@@ -25,11 +25,21 @@ $ git apply ../../../dr_wav_patch_esp32.patch
 
 ## Build
 
+1. You need to have **$IDF_PATH** and **$ADF_PATH** in you **$PATH** variable, then run (see more [here](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html#step-4-set-up-the-environment-variables))
+```
+$ get_idf
+```
+
+2. build the project
 ```bash
-$ maks
+$ make
 ```
 
 ## Flash
 ```bash
 $ make flash
 ```
+
+## License
+
+This project is licensed under the terms of the [MIT license](./LICENSE).
