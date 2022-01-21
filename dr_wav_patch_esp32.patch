@@ -1,0 +1,13 @@
+diff --git a/dr_wav.h b/dr_wav.h
+index a119d66..5af1ac9 100644
+--- a/dr_wav.h
++++ b/dr_wav.h
+@@ -4563,7 +4563,7 @@ DRWAV_PRIVATE drwav_result drwav_result_from_errno(int e)
+         case ENOTCONN: return DRWAV_NOT_CONNECTED;
+     #endif
+     #ifdef ESHUTDOWN
+-        case ESHUTDOWN: return DRWAV_ERROR;
++        // case ESHUTDOWN: return DRWAV_ERROR;
+     #endif
+     #ifdef ETOOMANYREFS
+         case ETOOMANYREFS: return DRWAV_ERROR;
