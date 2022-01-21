@@ -79,10 +79,12 @@ void play_wav(const char *fp)
         ESP_ERROR_CHECK(ESP_FAIL);
     }
 
-    const size_t sampleDataSize = 1000 * wav.channels * sizeof(int16_t);
+    const int NB_SAMPLES_TO_READ = 1000;
+
+    const size_t sampleDataSize = NB_SAMPLES_TO_READ * wav.channels * sizeof(int16_t);
     int16_t sampleData[sampleDataSize];
 
-    while (drwav_read_pcm_frames_s16le(&wav, 1000, sampleData) == 1000) {
+    while (drwav_read_pcm_frames_s16le(&wav, NB_SAMPLES_TO_READ, sampleData) == NB_SAMPLES_TO_READ) {
         size_t written;
         i2s_write(I2S_NUM_0, sampleData, sampleDataSize, &written, portMAX_DELAY);
         ESP_LOGV(TAG, "Write %zu bytes", written);
