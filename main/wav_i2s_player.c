@@ -10,8 +10,6 @@
 
 // adf
 #include "board.h"
-#include "esp_peripherals.h"
-#include "periph_sdcard.h"
 
 // idf
 #include "driver/i2s.h"
@@ -33,11 +31,31 @@ static const char *TAG = "WAV_I2S_PLAYER";
 
 static void init_sdcard(void)
 {
-    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+    sdmmc_card_t *card;
 
-    audio_board_key_init(set);
-    audio_board_sdcard_init(set, SD_MODE_1_LINE);
+    const esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+        .format_if_mount_failed = false,
+        .max_files = 15,
+        .allocation_unit_size = 16 * 1024,
+    };
+
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+
+    sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    slot_config.width = 1;
+
+    gpio_set_pull_mode(GPIO_NUM_15, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(GPIO_NUM_2, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(GPIO_NUM_4, GPIO_PULLUP_ONLY);
+
+    if (esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize SD card");
+        ESP_ERROR_CHECK(ESP_FAIL);
+    }
+
+    ESP_LOGI(TAG, "SD card initialization OK");
+
+    sdmmc_card_print_info(stdout, card);
 }
 
 static void init_i2s(void)
@@ -75,6 +93,8 @@ void play_wav(const char *fp)
 {
     drwav wav;
     if (!drwav_init_file(&wav, fp, NULL)) {
+        ESP_LOGE(TAG, "%s: File not found, add it on SD card", fp);
+        return;
         ESP_ERROR_CHECK(ESP_FAIL);
     }
 
@@ -98,12 +118,6 @@ void app_main(void)
 
     init_i2s();
     init_sdcard();
-
     play_wav(PATH_TO_WAV_FILE);
-
-    ESP_LOGI(TAG, "Done!");
-    while (1) {
-        ESP_LOGI(TAG, "...");
-        vTaskDelay(1000);
-    }
+    i2s_stop(I2S_NUM_0);
 }
